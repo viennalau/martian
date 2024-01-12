@@ -1,7 +1,10 @@
 import time
 import RPi.GPIO as GPIO
+from picamera import PiCamera
 GPIO.setmode(GPIO.BCM)
+
 char_amt = 0
+camera.rotation = 180
 
 martian_dict = {
   "A": [0, "red"],
@@ -36,40 +39,6 @@ martian_dict = {
   "Right": [4, "purple"]
 }
 
-#Regular LED Setup
-
-GPIO.setup('PIN', GPIO.OUT)
-red = GPIO.PWM('PIN', 5)
-GPIO.setup(5, GPIO.OUT)
-yellow = GPIO.PWM(5, 5)
-GPIO.setup(4, GPIO.OUT)
-green = GPIO.PWM(4, 5)
-GPIO.setup(5, GPIO.OUT)
-blue = GPIO.PWM(5, 5)
-
-
-
-# Buzzer Setup
-GPIO.setup('BuzzerPin#', GPIO.OUT)
-
-
-# Multicolor LED Setup - Orange
-
-GPIO.setup(21, GPIO.OUT)
-red_multi = GPIO.PWM(21, 75)
-GPIO.setup(20, GPIO.OUT)
-green_multi = GPIO.PWM(20, 75)
-GPIO.setup(16, GPIO.OUT)
-blue_multi = GPIO.PWM(16, 75)
-
-# Multicolor LED Setup - Purple
-
-GPIO.setup(21, GPIO.OUT)
-red_multi = GPIO.PWM(21, 75)
-GPIO.setup(20, GPIO.OUT)
-green_multi = GPIO.PWM(20, 75)
-GPIO.setup(16, GPIO.OUT)
-blue_multi = GPIO.PWM(16, 75)
 
 color_dict = {
   "red": ['gpioPinHere', 'GPIO.HIGH'],
@@ -133,11 +102,40 @@ def set_LED(color):
     print("LED set to " + color)
     
 
+def rotate_camera():
+  for i in [18, 23, 24, 25]:
+    GPIO.setup(i, GPIO.OUT)
+  def forward(fTurn):
+      for i in range(512*fTurn):
+          for i in [18, 23, 24, 25]:
+              GPIO.output(i, GPIO.HIGH)
+              time.sleep(0.0015)
+              GPIO.output(i, GPIO.LOW)
+              time.sleep(0.0015)
+              
+  def backward(bTurn):
+      for i in range(512*bTurn):
+          for i in [25, 24, 23, 18]:
+              GPIO.output(i, GPIO.HIGH)
+              time.sleep(0.0015)
+              GPIO.output(i, GPIO.LOW)
+              time.sleep(0.0015)
+  forward(3)
+  backward(3)
 
-def live_camera():
-  camera.start_preview()
-  time.sleep(10)
+  turn_direction = input("Which direction do you want to turn? Forward or Backward: ").upper()
+  turn_amount = input(f"How far do you want to turn {turn_direction}? ")
+  if turn_direction == "Forward":
+    forward(turn_amount)
+  elif turn_direction == "Backward":
+    backward(turn_amount)
+  
+  
+  
+  camera.start_preview(fullscreen=False, window=(100, 20, 640, 380))  
+  time.sleep(1) 
   input("Press enter to stop live viewing: ")
+  camera.stop_preview()
   camera.start_preview()
 
 def exit():
@@ -158,18 +156,19 @@ def bad():
     #time.sleep(0.5)
     #GPIO.output(led_pin_for_red, GPIO.LOW)
   
-send_message()
 slay = True
 
 while slay == True:
   print("Command List: Message, Camera, Exit, Good, Bad")
-  command = input("Enter command: ")
+  command = input("Enter command: ").title
   if command == "Message":
     send_message()
   elif command == "Camera":
-    cam_command = input("Your command list is: Live ").upper()
-    if cam_command == "Live":
+    cam_command = input("Camera Commands Live, Rotate").ttitle()
+    if cam_command  == "Live":
       live_camera()
+    elif cam_command == "Rotate":
+      rotate_camera()
     else:
       print("Not a command")
   elif command == "Exit":
