@@ -6,6 +6,8 @@ GPIO.setmode(GPIO.BCM)
 char_amt = 0
 camera.rotation = 180
 
+# Key = Letter
+# Value = amount of beeps and the LED color
 martian_dict = {
   "A": [0, "red"],
   "B": [0, "orange"],
@@ -39,61 +41,68 @@ martian_dict = {
   "Right": [4, "purple"]
 }
 
-#Regular LED Setup
+### Regular LED Setup ###
 
-#LED setup for the regular LEDs used in encoding
+## LED setup for the regular LEDs used in encoding ##
+
+# Red
 GPIO.setup(4, GPIO.OUT)
 red = GPIO.PWM(4, 5)
 
+# Yellow
 GPIO.setup(21, GPIO.OUT)
 yellow = GPIO.PWM(21, 5)
 
+# Green
 GPIO.setup(6, GPIO.OUT)
 green = GPIO.PWM(6, 5)
 
+# Blue
 GPIO.setup(16, GPIO.OUT)
 blue = GPIO.PWM(16, 5)
 
-# LED setup for the flashing red/green LEDs
+## LED setup for the flashing red/green LEDs ##
+# Red
 GPIO.setup(26, GPIO.OUT)
 red_bad = GPIO.PWM(26, 5)
 
+# Green
 GPIO.setup(22, GPIO.OUT)
 green_good = GPIO.PWM(22, 5)
 
-# Buzzer Setup
+## Buzzer Setup ##
 GPIO.setup(20, GPIO.OUT)
 buzzer = GPIO.PWM(20, 5)
 buzzer.start(0)
 buzzer.ChangeDutyCycle(0)
 
-
-# Multicolor LED Setup for encoding - Orange
+## Multicolor LED Setup for encoding ## 
+# Orange - Red Leg
 GPIO.setup(17, GPIO.OUT)
 orange_red_multi = GPIO.PWM(17, 75)
 orange_red_multi.start(0)
 
+# Orange - Green Leg
 GPIO.setup(19, GPIO.OUT)
 orange_green_multi = GPIO.PWM(19, 75)
 orange_green_multi.start(0)
 
+# Orange - Blue Leg
 GPIO.setup(5, GPIO.OUT)
 orange_blue_multi = GPIO.PWM(5, 75)
 orange_blue_multi.start(0)
 
-# Multicolor LED Setup for encoding - Purple
-
+# Purple - Red Leg
 GPIO.setup(12, GPIO.OUT)
 purple_red_multi = GPIO.PWM(12, 75)
 purple_red_multi.start(0)
 
+# Purple - Blue Leg
 GPIO.setup(13, GPIO.OUT)
 purple_blue_multi = GPIO.PWM(13, 75)
 purple_blue_multi.start(0)
 
-
-
-
+# Associates the color with a GPIO pin turns the LED on
 color_dict = {
   "red": [4, 'GPIO.HIGH'],
   "orange": [50, 30, 0],
@@ -103,14 +112,15 @@ color_dict = {
   "purple": [50, 0, 50]
 }
 
-
-
+#Takes a message and passes it to encode_message
 def send_message():
   message = input("Enter message: ").upper()
   print(f"Your message is {message}")
   encode_message(message)
   print("Message sent!")
 
+# Takes in the message, and for every character in the message it finds its corresponding value in color_dict to translate it into colors and beeps.
+# Then, beeps a certain amount and sets the LED color
 def encode_message(message):
   global martian_dict
   global color
@@ -140,29 +150,33 @@ def encode_message(message):
         print("Message encoding complete.")
         encoding = False
         break
-  
+        
+# Turns the buzzer on and off
 def beep_controller(beep_num):
   for i in range(beep_num):
     buzzer.ChangeDutyCycle(50)
     buzzer.ChangeDutyCycle(0)
     print(f"Beep {i+1}")
-    
     time.sleep(0.5)
-
+    
+# Changes the LED color
 def set_LED(color):
   global color_dict
+  # These specific colors are here because they are single LEDs and not multicolor
   if color in ("red", "yellow","green", "blue"):
     pin = color_dict[color][0]
     state = color_dict[color][1]
     GPIO.output(pin, state)
     print(pin,state)
     print("LED set to " + color)
+    
+  # These are multicolor LEDs so we have to use ChangeDutyCycle instead of GPIO.output
   elif color in ("orange", "purple"):
       color_fullname_red =  color + "_red_multi"
       color_fullname_green = color + "_green_multi"
       color_fullname_blue = color + "_blue_multi"
-      color_fullname_red.ChangeDutyCycle(color[0])
-      color_fullname_green.ChangeDutyCycle(color[1])
+      color_fullname_red.ChangeDutyCycle(color_dict[color][0])
+      color_fullname_green.ChangeDutyCycle(color_dict[color][1])
       color_fullname_blue.ChangeDutyCycle(color[2])
       print("LED set to " + color)
   else:
@@ -171,15 +185,14 @@ def set_LED(color):
 
 ### Camera Commands ###
 
-#Live Camera
+## Live Camera ##
 def live_camera():
   camera.start_preview(fullscreen=False, window=(100, 20, 640, 380))  
   time.sleep(1) 
   input("Press enter to stop live viewing: ")
   camera.stop_preview()
   
-
-# Rotate Camera
+## Rotate Camera ##
 def rotate_camera():
   for i in [18, 23, 24, 25]:
     GPIO.setup(i, GPIO.OUT)
@@ -202,17 +215,12 @@ def rotate_camera():
               GPIO.output(i, GPIO.LOW)
               time.sleep(0.0015)
               
-  turn_direction = input("Which direction do you want to turn? Forward or Backward: ").upper()
-  turn_amount = input(f"How far do you want to turn {turn_direction}? ")
+  turn_direction = input("Which direction do you want to turn? Forward or Backward: ").title()
+  turn_amount = input(int(f"How many times do you want to rotate {turn_direction}? "))
   if turn_direction == "Forward":
     forward(turn_amount)
   elif turn_direction == "Backward":
     backward(turn_amount)
-  
-# Exits the program
-def exit():
-  global slay
-  slay = False
 
 # If the Freshmen are doing well
 def good():
@@ -230,9 +238,8 @@ def bad():
     time.sleep(0.5)
     GPIO.output(26, GPIO.LOW)
   
-slay = True
-
-while slay == True:
+programOn = True
+while programOn == True:
   print("Command List: Message, Camera, Exit, Good, Bad")
   command = input("Enter command: ").title
   if command == "Message":
@@ -246,7 +253,7 @@ while slay == True:
     else:
       print("Not a command")
   elif command == "Exit":
-    slay = False
+    programOn = False
   elif command == "Good":
     good()
   elif command == "Bad":
