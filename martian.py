@@ -35,10 +35,6 @@ martian_dict = {
   "X": [3, "purple"],
   "Y": [4, "red"],
   "Z": [4, "orange"],
-  "Back": [4, "yellow"],
-  "Forward": [4, "green"],
-  "Left": [4, "blue" ],
-  "Right": [4, "purple"]
 }
 
 ### Regular LED Setup ###
@@ -64,11 +60,11 @@ blue = GPIO.PWM(16, 5)
 ## LED setup for the flashing red/green LEDs ##
 # Red
 GPIO.setup(26, GPIO.OUT)
-red_bad = GPIO.PWM(26, 5)
+red_bad = GPIO.PWM(26, 75)
 
 # Green
 GPIO.setup(22, GPIO.OUT)
-green_good = GPIO.PWM(22, 5)
+green_good = GPIO.PWM(22, 100)
 
 ## Buzzer Setup ##
 GPIO.setup(20, GPIO.OUT)
@@ -159,11 +155,11 @@ def encode_message(message):
 # Turns the buzzer on and off
 def beep_controller(beep_amt):
   for i in range(beep_amt):
-    buzzer.ChangeDutyCycle(20)
+    buzzer.ChangeDutyCycle(15)
     time.sleep(0.2)
     buzzer.ChangeDutyCycle(0)
     print(f"Beep {i+1}")
-    time.sleep(0.5)
+    time.sleep(0.2)
     
 # Changes the LED color
 def set_LED(color):
@@ -239,16 +235,18 @@ def rotate_camera():
 def good():
   for i in range(0,10):
     print(f'{i} good job')
+    time.sleep(.1)
     GPIO.output(22, GPIO.HIGH)
-    time.sleep(0.5)
+    time.sleep(0.1)
     GPIO.output(22, GPIO.LOW)
 
 # If the Freshmen are doing bad
 def bad():
   for i in range(0,10):
     print(f'{i} bad job')
+    time.sleep(.1)
     GPIO.output(26, GPIO.HIGH)
-    time.sleep(0.5)
+    time.sleep(.1)
     GPIO.output(26, GPIO.LOW)
   
 programOn = True
@@ -274,4 +272,5 @@ while programOn == True:
       bad()
   else:
       print("Invalid command.")
+
 
