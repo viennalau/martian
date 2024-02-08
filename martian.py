@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 from picamera import PiCamera
 GPIO.setmode(GPIO.BCM)
 camera = PiCamera()
-
+camera.rotation = 180
 char_amt = 0
 
 # Key = Letter
@@ -149,6 +149,7 @@ def encode_message(message):
           print("Error: Invalid character")
       elif char_amt >= len(message):
         print("Message encoding complete.")
+        char_amt = 0
         encoding = False
         break
         
@@ -158,7 +159,6 @@ def beep_controller(beep_amt):
     buzzer.ChangeDutyCycle(15)
     time.sleep(0.2)
     buzzer.ChangeDutyCycle(0)
-    print(f"Beep {i+1}")
     time.sleep(0.2)
     
 # Changes the LED color
@@ -200,41 +200,10 @@ def live_camera():
   time.sleep(1) 
   input("Press enter to stop live viewing: ")
   camera.stop_preview()
-  
-## Rotate Camera ##
-def rotate_camera():
-  for i in [18, 23, 24, 25]:
-    GPIO.setup(i, GPIO.OUT)
-
-  # Forward Turn
-  def forward(fTurn):
-      for i in range(512*fTurn):
-          for i in [18, 23, 24, 25]:
-              GPIO.output(i, GPIO.HIGH)
-              time.sleep(0.0015)
-              GPIO.output(i, GPIO.LOW)
-              time.sleep(0.0015)
-
-  # Backward Turn            
-  def backward(bTurn):
-      for i in range(512*bTurn):
-          for i in [25, 24, 23, 18]:
-              GPIO.output(i, GPIO.HIGH)
-              time.sleep(0.0015)
-              GPIO.output(i, GPIO.LOW)
-              time.sleep(0.0015)
-              
-  turn_direction = input("Which direction do you want to turn? Forward or Backward: ").title()
-  turn_amount = int(input(f"How many times do you want to rotate {turn_direction}? "))
-  if turn_direction == "Forward":
-    forward(turn_amount)
-  elif turn_direction == "Backward":
-    backward(turn_amount)
 
 # If the Freshmen are doing well
 def good():
   for i in range(0,10):
-    print(f'{i} good job')
     time.sleep(.1)
     GPIO.output(22, GPIO.HIGH)
     time.sleep(0.1)
@@ -243,7 +212,6 @@ def good():
 # If the Freshmen are doing bad
 def bad():
   for i in range(0,10):
-    print(f'{i} bad job')
     time.sleep(.1)
     GPIO.output(26, GPIO.HIGH)
     time.sleep(.1)
@@ -251,19 +219,23 @@ def bad():
   
 programOn = True
 while programOn == True:
+  print("-----------------------------------------------------")
   print("Command List: Message, Camera, Exit, Good, Bad")
   command = input("Enter command: ")
   if command.title() == "Message":
       send_message()
   elif command.title() == "Camera":
-      print("Camera Commands: Live, Rotate")
-      cam_command = input("Enter camera command: ")
-      if cam_command.title()  == "Live":
-          live_camera()
-      elif cam_command.title() == "Rotate":
-          rotate_camera()
-      else:
-        print("Invalid command.")
+      camera_commands = True
+      while camera_commands == True:
+          print("-----------------------------------------------------")
+          print("Camera Commands: Live, Exit")
+          cam_command = input("Enter camera command: ")
+          if cam_command.title()  == "Live":
+              live_camera()
+          elif cam_command.title() == "Exit":
+              camera_commands = False
+          else:
+              print("Invalid command.")
   elif command == "Exit":
       programOn = False
   elif command.title() == "Good":
@@ -272,5 +244,4 @@ while programOn == True:
       bad()
   else:
       print("Invalid command.")
-
 
