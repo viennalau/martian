@@ -140,7 +140,7 @@ def encode_message(message):
           color = martian_dict[char][1]
           beep_controller(beep_amt)
           set_LED(color)
-          time.sleep(2.5)
+          time.sleep(3.5)
           char_amt += 1
           continue
         elif char == " ":
