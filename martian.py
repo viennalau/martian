@@ -116,7 +116,9 @@ color_dict = {
 def send_message():
   message = input("Enter message: ").upper()
   print(f"Your message is {message}")
+  bad()
   encode_message(message)
+  good()
   print("Message sent!")
 
 # Takes in the message, and for every character in the message it finds its corresponding value in color_dict to translate it into colors and beeps.
@@ -203,18 +205,18 @@ def live_camera():
 
 # If the Freshmen are doing well
 def good():
-  for i in range(0,10):
-    time.sleep(.1)
+  for i in range(0,5):
+    time.sleep(.5)
     GPIO.output(22, GPIO.HIGH)
-    time.sleep(0.1)
+    time.sleep(.5)
     GPIO.output(22, GPIO.LOW)
 
 # If the Freshmen are doing bad
 def bad():
-  for i in range(0,10):
-    time.sleep(.1)
+  for i in range(0,8m):
+    time.sleep(.25)
     GPIO.output(26, GPIO.HIGH)
-    time.sleep(.1)
+    time.sleep(.25)
     GPIO.output(26, GPIO.LOW)
   
 programOn = True
