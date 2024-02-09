@@ -213,7 +213,7 @@ def good():
 
 # If the Freshmen are doing bad
 def bad():
-  for i in range(0,8m):
+  for i in range(0,8):
     time.sleep(.25)
     GPIO.output(26, GPIO.HIGH)
     time.sleep(.25)
